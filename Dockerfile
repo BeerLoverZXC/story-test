@@ -27,13 +27,12 @@ RUN wget -O /app/go/bin/geth https://github.com/piplabs/story-geth/releases/down
 RUN mkdir -p /app/.story/story/cosmovisor/genesis/bin && \
 mkdir -p /app/.story/story/cosmovisor/upgrades
 
-RUN chmod +x /root/.gaia/cosmovisor/genesis/bin/gaiad
-
 RUN git clone https://github.com/piplabs/story /app/story && \
     cd /app/story && \
     git checkout v0.13.2 && \
     go build -o story ./client && \
-    mv /app/story/story /app/.story/story/cosmovisor/genesis/bin/
+    mv /app/story/story /app/.story/story/cosmovisor/genesis/bin/ && \
+    chmod +x /app/.story/story/cosmovisor/genesis/bin/story
 
 RUN wget "https://github.com/cosmos/cosmos-sdk/releases/download/v0.44.0/cosmovisor-linux-amd64" -q && \
     mv cosmovisor-linux-amd64 /usr/bin/cosmovisor && \
@@ -57,4 +56,4 @@ RUN story init --moniker "Stake Shark" --network odyssey --chain-id 1513 && \
 RUN wget -O /app/.story/story/config/genesis.json https://server-3.itrocket.net/testnet/story/genesis.json && \
     wget -O /app/.story/story/config/addrbook.json https://server-3.itrocket.net/testnet/story/addrbook.json
 
-ENTRYPOINT ["cosmovisor", "start"]
+ENTRYPOINT ["/app/entrypoint.sh"]
