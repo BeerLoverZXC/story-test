@@ -13,7 +13,7 @@ PEERS="c2a6cc9b3fa468624b2683b54790eb339db45cbf@story-testnet-peer.itrocket.net:
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    curl git wget htop tmux build-essential jq make lz4 gcc unzip && \
+    tar curl git wget htop tmux build-essential jq make lz4 gcc unzip && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget "https://golang.org/dl/go$GO_VER.linux-amd64.tar.gz" -q && \
