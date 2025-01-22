@@ -15,9 +15,8 @@ PEERS="c2a6cc9b3fa468624b2683b54790eb339db45cbf@story-testnet-peer.itrocket.net:
 WORKDIR /app
 
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
-    tar curl git wget htop tmux build-essential jq make lz4 gcc unzip && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+    tar curl git wget htop tmux build-essential jq make lz4 gcc unzip
 
 RUN wget "https://golang.org/dl/go$GO_VER.linux-amd64.tar.gz" && \
     tar -C /usr/local -xzf "go$GO_VER.linux-amd64.tar.gz" && \
@@ -37,26 +36,22 @@ RUN git clone https://github.com/piplabs/story /app/story && \
     mv /app/story/story /app/.story/story/cosmovisor/genesis/bin/ && \
     chmod +x /app/.story/story/cosmovisor/genesis/bin/story
 
-RUN wget "https://github.com/cosmos/cosmos-sdk/releases/download/v0.44.0/cosmovisor-linux-amd64" -q && \
-    mv cosmovisor-linux-amd64 /usr/bin/cosmovisor && \
-    chmod +x /usr/bin/cosmovisor
+RUN go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
 
-RUN story init --moniker "Stake Shark" --network odyssey --chain-id 1513 && \
+RUN /app/.story/story/cosmovisor/genesis/bin/story init --moniker "Stake Shark" --network odyssey && \
     sed -i -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*seeds *=.*/seeds = \"$SEEDS\"/}" \
-           -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*persistent_peers *=.*/persistent_peers = \"$PEERS\"/}" \
-           /app/.story/story/config/config.toml && \
-    sed -i.bak -e "s%:1317%:${STORY_PORT}317%g; \
-                   s%:8551%:${STORY_PORT}551%g" \
-           /app/.story/story/config/story.toml && \
-    sed -i.bak -e "s%:26658%:${STORY_PORT}658%g; \
-                   s%:26657%:${STORY_PORT}657%g; \
-                   s%:26656%:${STORY_PORT}656%g; \
-                   s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${STORY_PORT}656\"%" \
-           /app/.story/story/config/config.toml && \
-    sed -i -e "s/prometheus = false/prometheus = true/" /app/.story/story/config/config.toml && \
-    sed -i -e "s/^indexer *=.*/indexer = \"null\"/" /app/.story/story/config/config.toml
+       -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*persistent_peers *=.*/persistent_peers = \"$PEERS\"/}" $HOME/.story/story/config/config.toml && \
+sed -i.bak -e "s%:1317%:${STORY_PORT}317%g; \
+s%:8551%:${STORY_PORT}551%g" $HOME/.story/story/config/story.toml && \
+sed -i.bak -e "s%:26658%:${STORY_PORT}658%g; \
+s%:26657%:${STORY_PORT}657%g; \
+s%:26656%:${STORY_PORT}656%g; \
+s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${STORY_PORT}656\"%; \
+s%:26660%:${STORY_PORT}660%g" $HOME/.story/story/config/config.toml && \
+sed -i -e "s/prometheus = false/prometheus = true/" $HOME/.story/story/config/config.toml && \
+sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.story/story/config/config.toml
 
-RUN wget -O /app/.story/story/config/genesis.json https://server-3.itrocket.net/testnet/story/genesis.json && \
-    wget -O /app/.story/story/config/addrbook.json https://server-3.itrocket.net/testnet/story/addrbook.json
+RUN wget -O /app/.story/story/config/genesis.json https://server-7.itrocket.net/testnet/story/genesis.json && \
+    wget -O /app/.story/story/config/addrbook.json https://server-7.itrocket.net/testnet/story/addrbook.json
 
 ENTRYPOINT ["/app/entrypoint.sh"]
